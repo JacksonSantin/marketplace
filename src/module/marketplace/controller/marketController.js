@@ -1,21 +1,36 @@
 import { computed, onMounted, ref, watch } from "vue";
-import Products from "../domain/model/products";
 import { useSnackbar } from "../composables/useSnackbar";
+import Products from "../domain/model/products";
+import Form from "../domain/model/form";
 
-const CART_STORAGE_KEY = 'marketplace_cart';
+const CART_STORAGE_KEY = "marketplace_cart";
 
 const marketController = (usecase) => () => {
   const { showError, showSuccess } = useSnackbar();
-  
+
+  const cartItems = ref([]);
   const currentYear = ref(new Date().getFullYear());
+  const formData = ref(new Form())
   const loading = ref(false);
   const produto = ref(new Products());
   const produtos = ref([]);
   const searchQuery = ref("");
-  const cartItems = ref([]);
   const isCartOpen = ref(false);
+  const rules = {
+    required: (value) => !!value || "Campo obrigatório",
+    email: (value) => {
+      const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return pattern.test(value) || "E-mail inválido";
+    },
+    phone: (value) => {
+      const pattern = /^\([0-9]{2}\)\s[0-9]{1}\s[0-9]{4}-[0-9]{4}$|^\([0-9]{2}\)\s[0-9]{4}-[0-9]{4}$/;
+      return pattern.test(value) || "Telefone inválido";
+    },
+    state: (value) => {
+      return (value && value.length === 2) || "Use a sigla do estado (ex: RS)";
+    },
+  };
 
-  // Carregar carrinho do localStorage
   const loadCartFromStorage = () => {
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY);
@@ -23,7 +38,7 @@ const marketController = (usecase) => () => {
         cartItems.value = JSON.parse(savedCart);
       }
     } catch (error) {
-      showError('Erro ao carregar carrinho: ' + error.message);
+      showError("Erro ao carregar carrinho: " + error.message);
     }
   };
 
@@ -31,19 +46,20 @@ const marketController = (usecase) => () => {
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems.value));
     } catch (error) {
-      showError('Erro ao salvar carrinho: ' + error.message);
+      showError("Erro ao salvar carrinho: " + error.message);
     }
   };
 
-  watch(cartItems, () => {
-    saveCartToStorage();
-  }, { deep: true });
+  watch(
+    cartItems,
+    () => {
+      saveCartToStorage();
+    },
+    { deep: true },
+  );
 
   const filteredProducts = computed(() => {
-    if (
-      !searchQuery.value ||
-      searchQuery.value.trim() === ""
-    ) {
+    if (!searchQuery.value || searchQuery.value.trim() === "") {
       return produtos.value;
     }
 
@@ -69,13 +85,13 @@ const marketController = (usecase) => () => {
 
   const cartTotal = computed(() => {
     return cartItems.value.reduce((total, item) => {
-      return total + (item.price * item.quantity);
+      return total + item.price * item.quantity;
     }, 0);
   });
 
   onMounted(async () => {
     loadCartFromStorage();
-    
+
     try {
       loading.value = true;
       produtos.value = await usecase.getProdutosUseCase();
@@ -88,36 +104,38 @@ const marketController = (usecase) => () => {
 
   const addToCart = (product) => {
     try {
-      const existingItem = cartItems.value.find(item => item.id === product.id);
-      
+      const existingItem = cartItems.value.find(
+        (item) => item.id === product.id,
+      );
+
       if (existingItem) {
         existingItem.quantity += 1;
-        showSuccess('Quantidade atualizada no carrinho!');
+        showSuccess("Quantidade atualizada no carrinho!");
       } else {
         cartItems.value.push({
           ...product,
-          quantity: 1
+          quantity: 1,
         });
-        showSuccess('Produto adicionado ao carrinho!');
+        showSuccess("Produto adicionado ao carrinho!");
       }
     } catch (error) {
-      showError('Erro ao adicionar produto: ' + error.message);
+      showError("Erro ao adicionar produto: " + error.message);
     }
   };
 
   const removeFromCart = (productId) => {
-    cartItems.value = cartItems.value.filter(item => item.id !== productId);
+    cartItems.value = cartItems.value.filter((item) => item.id !== productId);
   };
 
   const increaseQuantity = (productId) => {
-    const item = cartItems.value.find(item => item.id === productId);
+    const item = cartItems.value.find((item) => item.id === productId);
     if (item) {
       item.quantity += 1;
     }
   };
 
   const decreaseQuantity = (productId) => {
-    const item = cartItems.value.find(item => item.id === productId);
+    const item = cartItems.value.find((item) => item.id === productId);
     if (item) {
       if (item.quantity > 1) {
         item.quantity -= 1;
@@ -143,14 +161,16 @@ const marketController = (usecase) => () => {
   };
 
   return {
+    cartItems,
     currentYear,
+    formData,
     loading,
     produto,
     produtos,
     searchQuery,
-    filteredProducts,
-    cartItems,
     isCartOpen,
+    filteredProducts,
+    rules,
     cartItemCount,
     cartTotal,
     formatPrice,

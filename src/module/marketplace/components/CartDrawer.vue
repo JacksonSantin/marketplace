@@ -88,12 +88,12 @@
 
         <v-btn
           block
-          color="success"
+          color="#1F3B53"
           size="large"
-          prepend-icon="mdi-whatsapp"
-          @click="sendWhatsApp"
+          prepend-icon="mdi-check-circle"
+          @click="openCheckoutDialog"
         >
-          Enviar Pedido no WhatsApp
+          Finalizar Compra
         </v-btn>
 
         <v-btn
@@ -107,10 +107,18 @@
       </v-container>
     </template>
   </v-navigation-drawer>
+
+  <DialogForm
+    v-model="showCheckoutDialog"
+    :cart-items="cartItems"
+    :controller="controller"
+    @order-sent="handleOrderSent"
+  />
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
+import DialogForm from './DialogForm.vue'
 
 const props = defineProps({
   modelValue: {
@@ -129,6 +137,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'increase-quantity', 'decrease-quantity', 'remove-item', 'clear-cart'])
 
+const showCheckoutDialog = ref(false)
+
 const isOpen = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
@@ -140,24 +150,13 @@ const totalPrice = computed(() => {
   }, 0)
 })
 
-const sendWhatsApp = () => {
-  let message = '*Pedido do MarketPlace* \n\n'
-  
-  props.cartItems.forEach(item => {
-    message += `• *${item.title}*\n`
-    message += `  Quantidade: ${item.quantity}\n`
-    message += `  Preço unitário: ${props.controller.formatPrice(item.price)}\n`
-    message += `  Subtotal: ${props.controller.formatPrice(item.price * item.quantity)}\n\n`
-  })
-  
-  message += `*Total Geral: ${props.controller.formatPrice(totalPrice.value)}*`
-  
-  const encodedMessage = encodeURIComponent(message)
-  
-  const phoneNumber = '5554996262629'
-  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`
-  
-  window.open(whatsappUrl, '_blank')
+const openCheckoutDialog = () => {
+  showCheckoutDialog.value = true
+}
+
+const handleOrderSent = () => {
+  emit('clear-cart')
+  isOpen.value = false
 }
 
 const increaseQuantity = (itemId) => {

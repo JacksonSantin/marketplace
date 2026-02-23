@@ -36,23 +36,26 @@
       {{ product.description }}
     </v-card-subtitle>
 
-    <v-card-text>
-      <div class="text-h5 font-weight-bold text-black">
-        {{ controller.formatPrice(props.product.price) }}
+    <v-card-text class="px-4 pb-4">
+      <div class="d-flex justify-space-between align-center">
+        <div class="text-h5 font-weight-bold text-black">
+          {{ controller.formatPrice(props.product.price) }}
+        </div>
+        
+        <v-tooltip text="Adicionar ao Carrinho" location="top">
+          <template v-slot:activator="{ props: tooltipProps }">
+            <v-btn
+              icon
+              color="#1F3B53"
+              v-bind="tooltipProps"
+              @click="handleAddToCart"
+            >
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
       </div>
     </v-card-text>
-
-    <v-card-actions class="px-4 pb-4">
-      <v-btn
-        block
-        color="primary"
-        variant="flat"
-        prepend-icon="mdi-cart-plus"
-        @click="handleAddToCart"
-      >
-        Adicionar ao Carrinho
-      </v-btn>
-    </v-card-actions>
   </v-card>
 </template>
 
@@ -87,6 +90,7 @@ const handleAddToCart = () => {
 .product-description {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
