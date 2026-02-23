@@ -115,18 +115,18 @@
 
       <v-divider />
 
-      <v-card-actions class="px-6 d-flex align-center justify-space-between">
+      <v-card-actions class="px-3 px-sm-6 py-3">
         <v-btn
           color="#25D366"
           variant="elevated"
           :disabled="!valid"
-          size="large"
           prepend-icon="mdi-whatsapp"
           class="text-white"
           block
           @click="sendWhatsApp"
         >
-          Enviar Pedido por WhatsApp
+          <span class="d-none d-sm-inline">Enviar Pedido por WhatsApp</span>
+          <span class="d-inline d-sm-none">Enviar por WhatsApp</span>
         </v-btn>
       </v-card-actions>
     </v-card>
