@@ -116,8 +116,6 @@
       <v-divider />
 
       <v-card-actions class="px-6 d-flex align-center justify-space-between">
-        <v-btn variant="outlined" @click="close"> Cancelar </v-btn>
-
         <v-btn
           color="#25D366"
           variant="elevated"
@@ -125,6 +123,7 @@
           size="large"
           prepend-icon="mdi-whatsapp"
           class="text-white"
+          block
           @click="sendWhatsApp"
         >
           Enviar Pedido por WhatsApp
