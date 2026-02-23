@@ -190,10 +190,8 @@ const formatPhoneNumber = (inputValue) => {
       if (value.length <= 6) {
         formatted += value.substring(2);
       } else if (value.length <= 10) {
-        // Formato fixo: (54) 9999-9999
         formatted += value.substring(2, 6) + '-' + value.substring(6);
       } else {
-        // Formato celular: (54) 9 9999-9999
         formatted += value.substring(2, 3) + ' ' + value.substring(3, 7) + '-' + value.substring(7);
       }
     }
